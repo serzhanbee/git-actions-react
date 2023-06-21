@@ -20,7 +20,6 @@ jobs:
         run: npm run test
   lint:
     runs-on: ubuntu-latest
-    needs: test
     steps:
       - name: Get the repository code
         uses: actions/checkout@v3
@@ -34,11 +33,19 @@ jobs:
       - name: Lint application
         run: npm run lint
   build:
-    runs-on: ubuntu-latest
-    needs: lint
+    needs: [test, lint]
+    strategy:
+      matrix:
+        node-version: [14, 16]
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
     steps:
       - name: Get the repository code
         uses: actions/checkout@v3
+      - name: Install Node Js
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
       - name: Cache dependecies
         uses: actions/cache@v3
         with:
